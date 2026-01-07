@@ -27,10 +27,13 @@ function dev() {
     check_command docker
 
     # Determine which docker compose command to use
+    # Determine which docker compose command to use
     if docker compose version &> /dev/null; then
         DOCKER_COMPOSE_CMD="docker compose"
+        echo "Using Docker Compose V2 (Plugin)"
     elif command -v docker-compose &> /dev/null; then
         DOCKER_COMPOSE_CMD="docker-compose"
+        echo "Using Docker Compose V1 (Legacy)"
     else
         echo "Error: docker-compose is not installed."
         exit 1
