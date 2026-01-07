@@ -25,7 +25,16 @@ function dev() {
     print_header "Starting Local Development Stack"
 
     check_command docker
-    check_command docker-compose
+
+    # Determine which docker compose command to use
+    if docker compose version &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker compose"
+    elif command -v docker-compose &> /dev/null; then
+        DOCKER_COMPOSE_CMD="docker-compose"
+    else
+        echo "Error: docker-compose is not installed."
+        exit 1
+    fi
 
     if [ ! -f .env ]; then
         if [ -f .env.example ]; then
@@ -67,7 +76,7 @@ EOF
     fi
 
     echo "Building and Starting Containers..."
-    docker-compose up -d --build
+    $DOCKER_COMPOSE_CMD up -d --build
 
     print_success "Stack is running!"
     echo "---------------------------------------------------"
@@ -81,7 +90,7 @@ EOF
 
 function down() {
     print_header "Stopping Stack"
-    docker-compose down
+    $DOCKER_COMPOSE_CMD down
     print_success "Stack stopped."
 }
 
@@ -90,7 +99,7 @@ function clean() {
     read -p "Are you sure you want to delete all database data? (y/N) " -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
-        docker-compose down -v
+        $DOCKER_COMPOSE_CMD down -v
         print_success "Stack stopped and volumes removed."
     else
         echo "Aborted."
@@ -99,7 +108,7 @@ function clean() {
 
 function logs() {
     print_header "Streaming Logs"
-    docker-compose logs -f
+    $DOCKER_COMPOSE_CMD logs -f
 }
 
 function init_db() {
