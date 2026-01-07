@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+celery[redis]
+redis
+python-dotenv
+sqlalchemy
+psycopg2-binary
+requests
+openai
+scipy
+# torch  <-- Uncomment if needing local inference later, but for now we might use APIs or runpod
+# vllm   <-- Uncomment for Phase 3
