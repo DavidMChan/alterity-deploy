@@ -2,8 +2,20 @@ import { NextResponse } from "next/server"
 import Redis from "ioredis"
 import { createClient } from "@supabase/supabase-js"
 
-// Redis connection - using Generic Redis string or Upstash
-const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379")
+// Lazy load Redis connection
+let redisString: string | null = null;
+let redisClient: Redis | null = null;
+
+function getRedis() {
+    if (!redisClient) {
+        if (!redisString) {
+            redisString = process.env.REDIS_URL || "redis://localhost:6379"
+        }
+        redisClient = new Redis(redisString)
+    }
+    return redisClient
+}
+
 
 // Admin Supabase Client for backend ops
 const supabase = createClient(
@@ -14,6 +26,7 @@ const supabase = createClient(
 export async function POST(req: Request) {
     try {
         const { surveyId, configId, methodology, userId, modelName } = await req.json()
+        const redis = getRedis();
 
         // 1. Create Survey Run Entry
         const { data: run, error } = await supabase

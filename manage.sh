@@ -102,14 +102,37 @@ function logs() {
     docker-compose logs -f
 }
 
+function init_db() {
+    print_header "Initializing Database"
+
+    echo "Waiting for database to be ready..."
+    sleep 5
+
+    # Apply Schema
+    echo "Applying Schema..."
+    # We use the db service to run psql
+    # NOTE: The file path inside the container must match volume mount or we cat it
+    # Since we didn't mount schema.sql in a way we can easily execute via CLI optionally without restarting,
+    # let's rely on docker-compose exec to pipe it.
+
+    docker-compose exec -T db psql -U postgres -d postgres < supabase/schema.sql
+
+    # Apply Seed
+    echo "Applying Seed Data..."
+    docker-compose exec -T db psql -U postgres -d postgres < supabase/seed.sql
+
+    print_success "Database initialized."
+}
+
 function help() {
     echo "Usage: ./manage.sh [command]"
     echo "Commands:"
-    echo "  dev    - Start the full stack locally (Docker Compose)"
-    echo "  down   - Stop the stack"
-    echo "  clean  - Stop the stack and remove data volumes"
-    echo "  logs   - Stream logs from all services"
-    echo "  help   - Show this help message"
+    echo "  dev      - Start the full stack locally (Docker Compose)"
+    echo "  init-db  - Apply schema and seed data to the database"
+    echo "  down     - Stop the stack"
+    echo "  clean    - Stop the stack and remove data volumes"
+    echo "  logs     - Stream logs from all services"
+    echo "  help     - Show this help message"
 }
 
 # Main Dispatch
@@ -125,6 +148,9 @@ case "$1" in
         ;;
     logs)
         logs
+        ;;
+    init-db)
+        init_db
         ;;
     *)
         if [ -z "$1" ]; then
