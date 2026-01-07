@@ -75,7 +75,7 @@ services:
   # --------------------------------------------------------------------------
 
   studio:
-    image: supabase/studio:20240101-8e503b6
+    image: supabase/studio:latest
     restart: unless-stopped
     healthcheck:
       test:
